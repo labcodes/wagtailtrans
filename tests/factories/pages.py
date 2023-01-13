@@ -34,7 +34,7 @@ class TranslatablePageFactory(factory.django.DjangoModelFactory):
     def _build(cls, *args, **kwargs):
         obj = super()._build(*args, **kwargs)
         if not obj.title:
-            obj.title = "Page-{}".format(obj.language.code)
+            obj.title = f'Page-{obj.language.code}'
         return obj
 
 
@@ -62,7 +62,7 @@ class HomePageFactory(TranslatablePageFactory):
         # Set some other basic attributes
         for part in ('subtitle', 'body'):
             if not getattr(obj, part):
-                setattr(obj, part, "{} {}".format(part, obj.language.code))
+                setattr(obj, part, f'{part} {obj.language.code}')
         return obj
 
 

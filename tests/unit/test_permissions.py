@@ -13,7 +13,7 @@ class TestTranslatableUserProxyPermission:
 
     def setup(self):
         self.admin_user = UserFactory(is_superuser=True)
-        self.editor_user = UserFactory(first_name='Mr.XY', last_name="Z", username="translator")
+        self.editor_user = UserFactory(first_name='Mr.XY', last_name='Z', username='translator')
         self.default_language = Language.objects.get(code='en')
         pages = sites.create_site_tree(language=self.default_language)
         self.last_page = pages[-1]

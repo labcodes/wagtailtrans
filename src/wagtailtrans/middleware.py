@@ -1,8 +1,7 @@
 from django.conf import settings
 from django.utils import translation
-from django.utils.deprecation import MiddlewareMixin
-from django.utils.translation import LANGUAGE_SESSION_KEY, check_for_language, get_language_from_path
-from django.utils.translation.trans_real import get_languages, get_supported_language_variant
+from django.utils.translation import get_language_from_path
+from django.utils.translation.trans_real import get_supported_language_variant
 
 from wagtail.core.models import Site
 
@@ -23,13 +22,6 @@ def get_language_from_request(request):
     if lang_code is not None:
         return lang_code
 
-    supported_lang_codes = get_languages()
-
-    if hasattr(request, 'session'):
-        lang_code = request.session.get(LANGUAGE_SESSION_KEY)
-        if lang_code in supported_lang_codes and lang_code is not None and check_for_language(lang_code):
-            return lang_code
-
     lang_code = request.COOKIES.get(settings.LANGUAGE_COOKIE_NAME)
 
     try:
@@ -38,12 +30,25 @@ def get_language_from_request(request):
         return None
 
 
-class TranslationMiddleware(MiddlewareMixin):
-    def process_request(self, request):
+class TranslationMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        _request = self._process_request(request)
+        _response = self.get_response(_request)
+        response = self._process_response(
+            request=request,
+            response=_response
+        )
+        return response
+
+
+    def _process_request(self, request):
         active_language = None
 
         language_from_request = get_language_from_request(request)
-        requested_languages = request.META.get('HTTP_ACCEPT_LANGUAGE')
+        requested_languages = request.headers.get('accept-language')
 
         # Backwards-compatible lookup for the deprecation of Wagtails SiteMiddleware per 2.9
         if 'wagtail.core.middleware.SiteMiddleware' in settings.MIDDLEWARE:
@@ -76,8 +81,9 @@ class TranslationMiddleware(MiddlewareMixin):
 
         translation.activate(active_language)
         request.LANGUAGE_CODE = active_language
+        return request
 
-    def process_response(self, request, response):
+    def _process_response(self, request, response):
         if 'Content-Language' not in response:
             response['Content-Language'] = request.LANGUAGE_CODE
 

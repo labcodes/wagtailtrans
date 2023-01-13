@@ -1,5 +1,4 @@
 import pytest
-import six
 from django.core.exceptions import ValidationError
 from django.test import override_settings
 from wagtail.admin.edit_handlers import get_form_for_model
@@ -24,21 +23,25 @@ class TestWagtailAdminLanguageForm:
 
     def test_clean_is_default(self):
         language = LanguageFactory(is_default=True)
-        form = self.form_class(instance=language, data={
-            'code': language.code,
-            'position': language.position,
-            'is_default': True,
-        })
+        form = self.form_class(
+            instance=language, data={
+                'code': language.code,
+                'position': language.position,
+                'is_default': True,
+            },
+        )
 
         assert form.is_valid()
 
     def test_remove_is_default(self):
         language = LanguageFactory(is_default=True)
-        form = self.form_class(instance=language, data={
-            'code': language.code,
-            'position': language.position,
-            'is_default': False,
-        })
+        form = self.form_class(
+            instance=language, data={
+                'code': language.code,
+                'position': language.position,
+                'is_default': False,
+            },
+        )
 
         assert not form.is_valid()
         assert 'is_default' in form.errors
@@ -46,11 +49,13 @@ class TestWagtailAdminLanguageForm:
     def test_switch_language(self):
         LanguageFactory(is_default=True)
         new_default = LanguageFactory(code='nl', is_default=False)
-        form = self.form_class(instance=new_default, data={
-            'code': new_default.code,
-            'position': new_default.position,
-            'is_default': True,
-        })
+        form = self.form_class(
+            instance=new_default, data={
+                'code': new_default.code,
+                'position': new_default.position,
+                'is_default': True,
+            },
+        )
 
         assert form.is_valid()
         new_default = form.save()
@@ -65,8 +70,9 @@ class TestLanguage:
             code='en', defaults={
                 'is_default': True,
                 'position': 1,
-                'live': True
-            })
+                'live': True,
+            },
+        )
         assert isinstance(en, models.Language)
 
     def test_create_many(self, languages):
@@ -74,7 +80,7 @@ class TestLanguage:
 
     def test_str(self):
         language = LanguageFactory()
-        assert six.text_type(language) == 'British English'
+        assert str(language) == 'British English'
 
     def test_default(self, languages):
         assert models.Language.objects.default().code == 'en'
@@ -233,7 +239,8 @@ class TestTranslatablePage:
         nl_subpage1 = TranslatablePageFactory.build(language=nl, title='subpage1 in NL tree', canonical_page=subpage1)
         nl_subpage2 = TranslatablePageFactory.build(language=nl, title='subpage2 in NL tree', canonical_page=subpage2)
         nl_leaf_page = TranslatablePageFactory.build(
-            language=nl, title='leafpage in NL tree', canonical_page=leaf_page)
+            language=nl, title='leafpage in NL tree', canonical_page=leaf_page,
+        )
         nl_root.add_child(instance=nl_subpage1)
         nl_root.add_child(instance=nl_subpage2)
         nl_subpage1.add_child(instance=nl_leaf_page)
@@ -300,7 +307,7 @@ class TestTranslatableSiteRootPage:
         perms = self.site_root.permissions_for_user(another_user)
         assert not perms.can_publish()
 
-    def test_serve(self,rf):
+    def test_serve(self, rf):
         site = SiteFactory()
         request = rf.get('/home/')
         response = site.root_page.serve(request)

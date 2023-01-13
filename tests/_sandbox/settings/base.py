@@ -72,7 +72,7 @@ if WAGTAIL_VERSION >= (2, 9):
         'django.contrib.messages.middleware.MessageMiddleware',
         'django.middleware.clickjacking.XFrameOptionsMiddleware',
         'wagtail.contrib.redirects.middleware.RedirectMiddleware',
-        'wagtailtrans.middleware.TranslationMiddleware'
+        'wagtailtrans.middleware.TranslationMiddleware',
     ]
 else:
     MIDDLEWARE = [
@@ -85,7 +85,7 @@ else:
         'django.middleware.clickjacking.XFrameOptionsMiddleware',
         'wagtail.core.middleware.SiteMiddleware',
         'wagtail.contrib.redirects.middleware.RedirectMiddleware',
-        'wagtailtrans.middleware.TranslationMiddleware'
+        'wagtailtrans.middleware.TranslationMiddleware',
     ]
 
 ROOT_URLCONF = 'tests._sandbox.urls'
@@ -112,12 +112,12 @@ WSGI_APPLICATION = 'tests._sandbox.wsgi.application'
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 DATABASES = {
     'default': {
-        'ENGINE': os.getenv('DATABASE_ENGINE', 'django.db.backends.postgresql_psycopg2'),
+        'ENGINE': os.getenv('DATABASE_ENGINE', 'django.db.backends.postgresql'),
         'NAME': os.getenv('DATABASE_NAME', 'wagtailtrans_sandbox'),
         'HOST': os.getenv('DATABASE_HOST', ''),
         'USER': os.getenv('DATABASE_USER', ''),
         'PASSWORD': os.getenv('DATABASE_PASS', ''),
-    }
+    },
 }
 
 # Password validation
@@ -146,7 +146,6 @@ TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
-USE_L10N = True
 
 USE_TZ = True
 
@@ -160,9 +159,12 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'assets', 'static')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'assets', 'media')
 
 # wagtail settings
-WAGTAIL_SITE_NAME = "sandbox"
+WAGTAIL_SITE_NAME = 'sandbox'
+WAGTAILADMIN_BASE_URL = 'ttp://example.com'
 
 BASE_URL = 'http://example.com'
+
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # wagtailtrans setting
 WAGTAILTRANS_SYNC_TREE = True

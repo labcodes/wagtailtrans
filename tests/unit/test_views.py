@@ -36,7 +36,7 @@ class TestAddTranslationView:
         assert parent_page_qs.model is not TranslatablePage
         assert parent_page_qs.first() == self.pages[0]
 
-        french_root = pages.TranslatablePageFactory.build(language=fr, title="French root")
+        french_root = pages.TranslatablePageFactory.build(language=fr, title='French root')
         self.pages[0].add_child(instance=french_root)
 
         response = view.dispatch(request, instance_id=self.last_page.pk, language_code='fr')

@@ -1,4 +1,4 @@
-from django.conf.urls import include, url
+from django.urls import include, path
 from django.templatetags.static import static
 from django.urls import reverse
 from django.utils.encoding import force_str
@@ -16,7 +16,7 @@ from wagtailtrans.urls import translations
 class LanguageModelAdmin(ModelAdmin):
     add_to_settings_menu = True
     model = Language
-    menu_label = _("Languages")
+    menu_label = _('Languages')
     menu_icon = 'icon icon-wagtail'
     menu_order = 1000
     list_display = ['__str__', 'position', 'live', 'is_default']
@@ -29,7 +29,7 @@ modeladmin_register(LanguageModelAdmin)
 @hooks.register('register_admin_urls')
 def register_admin_urls():
     return [
-        url(r'^translate/', include(translations, namespace='wagtailtrans_translations')),
+        path('translate/', include(translations, namespace='wagtailtrans_translations')),
     ]
 
 
@@ -38,7 +38,8 @@ if get_wagtailtrans_setting('LANGUAGES_PER_SITE'):
     def global_admin_js():
         return format_html(
             '<script type="text/javascript" src="{path}"></script>'.format(
-                path=static('wagtailtrans/js/site_languages_editor.js'))
+                path=static('wagtailtrans/js/site_languages_editor.js'),
+            ),
         )
 
 
@@ -46,7 +47,7 @@ if not get_wagtailtrans_setting('SYNC_TREE'):
     """Only load hooks when WAGTAILTRANS_SYNC_TREE is disabled"""
 
     @hooks.register('register_page_listing_buttons')
-    def page_translations_menu(page, page_perms, is_parent=False):
+    def page_translations_menu(page, page_perms, next_url=None):
         if not hasattr(page, 'language'):
             return
 
@@ -58,12 +59,12 @@ if not get_wagtailtrans_setting('SYNC_TREE'):
             hook_name='wagtailtrans_dropdown_hook',
             page=page,
             page_perms=page_perms,
-            is_parent=is_parent,
-            priority=10
+            next_url=next_url,
+            priority=10,
         )
 
     @hooks.register('wagtailtrans_dropdown_hook')
-    def page_translations_menu_items(page, page_perms, is_parent=False):
+    def page_translations_menu_items(page, page_perms, next_url=None):
         prio = 1
         exclude_lang = None
 
@@ -72,18 +73,21 @@ if not get_wagtailtrans_setting('SYNC_TREE'):
 
         other_languages = set(Language.objects.exclude(pk=exclude_lang.pk).order_by('position'))
 
-        translations = page.get_translations(only_live=False).select_related('language')
-        taken_languages = set(t.language for t in translations)
+        _translations = page.get_translations(only_live=False).select_related('language')
+        taken_languages = {t.language for t in _translations}
 
         translation_targets = other_languages - taken_languages
         for language in translation_targets:
             yield widgets.Button(
                 force_str(language),
-                reverse('wagtailtrans_translations:add', kwargs={
-                    'instance_id': page.pk,
-                    'language_code': language.code,
-                }),
-                priority=prio)
+                reverse(
+                    'wagtailtrans_translations:add', kwargs={
+                        'instance_id': page.pk,
+                        'language_code': language.code,
+                    },
+                ),
+                priority=prio,
+            )
 
             prio += 1
 
@@ -101,13 +105,13 @@ def hide_non_canonical_languages(parent_page, pages, request):
                 TranslatablePage.objects
                 .filter(canonical_page__isnull=True)
                 .values_list('pk', flat=True)
-            )
+            ),
         )
     return pages
 
 
 @hooks.register('register_page_listing_buttons')
-def edit_in_language_button(page, page_perms, is_parent=False):
+def edit_in_language_button(page, page_perms, next_url=None, **kwargs):
     """Add ``Edit in`` button to the page explorer.
 
     When hiding all other translation except the canonical language, which is
@@ -120,17 +124,17 @@ def edit_in_language_button(page, page_perms, is_parent=False):
         return
 
     yield widgets.ButtonWithDropdownFromHook(
-        _("Edit in"),
+        _('Edit in'),
         hook_name='wagtailtrans_dropdown_edit_hook',
         page=page,
         page_perms=page_perms,
-        is_parent=is_parent,
-        priority=10
+        next_url=next_url,
+        priority=10,
     )
 
 
 @hooks.register('wagtailtrans_dropdown_edit_hook')
-def edit_in_language_items(page, page_perms, is_parent=False):
+def edit_in_language_items(page, page_perms, next_url=None, **kwargs):
     """Add all other languages in the ``Edit in`` dropdown.
 
     All languages other than the canonical language are listed as dropdown
@@ -153,9 +157,9 @@ def edit_in_language_items(page, page_perms, is_parent=False):
 
         yield widgets.Button(
             force_str(language_page.language),
-            "{edit_url}?next={next_url}".format(
+            '{edit_url}?next={next_url}'.format(
                 edit_url=edit_url,
-                next_url=next_url
+                next_url=next_url,
             ),
             priority=prio,
         )

@@ -21,6 +21,6 @@ class TestEditHandlers:
 
     def test_canonicalpage_widget(self):
         widget = CanonicalPageWidget(canonical_page=self.last_page)
-        widget_contents = widget.render(name="Last Page", value="lstp")
+        widget_contents = widget.render(name='Last Page', value='lstp')
         assert 'name="Last Page"' in widget_contents
         assert 'type="hidden"' in widget_contents

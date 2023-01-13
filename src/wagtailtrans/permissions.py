@@ -1,6 +1,7 @@
 from django.contrib.auth.models import Group, Permission
 from wagtail.core.models import (
-    Collection, GroupCollectionPermission, GroupPagePermission, PagePermissionTester, UserPagePermissionsProxy)
+    Collection, GroupCollectionPermission, GroupPagePermission, PagePermissionTester, UserPagePermissionsProxy,
+)
 
 from wagtailtrans.conf import get_wagtailtrans_setting
 
@@ -13,25 +14,34 @@ def create_group_permissions(group, language):
     """
     collection_perms = [
         Permission.objects.get_by_natural_key(
-            'add_document', 'wagtaildocs', 'document'),
+            'add_document', 'wagtaildocs', 'document',
+        ),
         Permission.objects.get_by_natural_key(
-            'change_document', 'wagtaildocs', 'document'),
+            'change_document', 'wagtaildocs', 'document',
+        ),
         Permission.objects.get_by_natural_key(
-            'delete_document', 'wagtaildocs', 'document'),
+            'delete_document', 'wagtaildocs', 'document',
+        ),
         Permission.objects.get_by_natural_key(
-            'change_image', 'wagtailimages', 'image'),
+            'change_image', 'wagtailimages', 'image',
+        ),
         Permission.objects.get_by_natural_key(
-            'add_image', 'wagtailimages', 'image'),
+            'add_image', 'wagtailimages', 'image',
+        ),
         Permission.objects.get_by_natural_key(
-            'delete_image', 'wagtailimages', 'image'),
+            'delete_image', 'wagtailimages', 'image',
+        ),
     ]
     # access wagtail admin permission
-    group.permissions.add(Permission.objects.get_by_natural_key(
-        'access_admin', 'wagtailadmin', 'admin'
-    ))
+    group.permissions.add(
+        Permission.objects.get_by_natural_key(
+            'access_admin', 'wagtailadmin', 'admin',
+        ),
+    )
 
     collection = Collection.objects.filter(
-        name='collection-%s' % language.code).first()
+        name='collection-%s' % language.code,
+    ).first()
     if not collection:
         root = Collection.objects.first().get_root()
         collection = root.add_child(name='collection-%s' % language.code)
@@ -39,7 +49,7 @@ def create_group_permissions(group, language):
             GroupCollectionPermission.objects.create(
                 permission=perm,
                 group=group,
-                collection=collection
+                collection=collection,
             )
 
 
@@ -50,7 +60,8 @@ def get_or_create_language_group(language):
     :return: Group
     """
     group, created = Group.objects.get_or_create(
-        name='translator-%s' % language.code)
+        name='translator-%s' % language.code,
+    )
     if created:
         create_group_permissions(group, language)
     return group
@@ -70,7 +81,7 @@ def create_group_page_permission(page, language):
         GroupPagePermission.objects.create(
             group=group,
             page=page,
-            permission_type=perm
+            permission_type=perm,
         )
 
 

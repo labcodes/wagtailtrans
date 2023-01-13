@@ -9,7 +9,7 @@ sys.path.append(os.path.join(PROJECT_DIR, 'src'))
 from wagtailtrans import get_version  # noqa isort:skip
 
 install_requires = [
-    'wagtail>=2.7,<2.12'
+    'wagtail>=2.7',
 ]
 
 sandbox_require = [
@@ -53,7 +53,7 @@ setup(
     package_dir={'': 'src'},
     include_package_data=True,
     license='BSD',
-    long_description=open('README.rst').read(),
+    long_description=open('README.rst', encoding='utf-8').read(),
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',
@@ -65,13 +65,17 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
         'Framework :: Django',
         'Framework :: Django :: 2.1',
         'Framework :: Django :: 2.2',
         'Framework :: Django :: 3.0',
         'Framework :: Django :: 3.1',
+        'Framework :: Django :: 3.2',
+        'Framework :: Django :: 4.0',
+        'Framework :: Django :: 4.1',
         'Framework :: Wagtail',
-        'Framework :: Wagtail :: 2',
+        'Framework :: Wagtail :: 4',
         'Topic :: Internet :: WWW/HTTP :: Site Management',
-    ]
+    ],
 )

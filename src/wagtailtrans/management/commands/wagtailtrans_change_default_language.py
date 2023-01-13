@@ -12,14 +12,14 @@ class Command(BaseCommand):
 
     def handle(self, language, *args, **kwargs):
         if not language:
-            raise CommandError("Missing --language argument")
+            raise CommandError('Missing --language argument')
         try:
             new_default = Language.objects.get(code=language)
         except ObjectDoesNotExist:
-            raise CommandError("Language is not yet set in your site")
+            raise CommandError('Language is not yet set in your site')
 
         current_default = Language.objects.default()
         if new_default == current_default:
-            raise CommandError("Language {} is already default language".format(new_default))
+            raise CommandError(f'Language {new_default} is already default language')
 
         change_default_language(new_default)

@@ -11,7 +11,8 @@ pytest_plugins = 'tests.fixtures'
 
 def pytest_configure(config):
     media_root = os.path.join(
-        tempfile.gettempdir(), 'wagtailtrans-media-%d' % random.getrandbits(8))
+        tempfile.gettempdir(), 'wagtailtrans-media-%d' % random.getrandbits(8),
+    )
 
     if os.path.exists(media_root):
         shutil.rmtree(media_root)
@@ -19,7 +20,7 @@ def pytest_configure(config):
 
     override = override_settings(
         DEBUG=False,
-        MEDIA_ROOT=media_root
+        MEDIA_ROOT=media_root,
     )
     override.enable()
 

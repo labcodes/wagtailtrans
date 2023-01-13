@@ -6,7 +6,7 @@ class UserFactory(factory.django.DjangoModelFactory):
 
     first_name = 'John'
     last_name = 'Doe'
-    email = factory.LazyAttribute(lambda a: '{0}.{1}@example.org'.format(a.first_name, a.last_name).lower())
+    email = factory.LazyAttribute(lambda a: f'{a.first_name}.{a.last_name}@example.org'.lower())
     password = 'secret1234'
 
     class Meta:

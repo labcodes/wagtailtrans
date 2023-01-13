@@ -22,7 +22,8 @@ class TranslationForm(forms.ModelForm):
             self.fields['copy_from_canonical'].initial = True
             self.fields['copy_from_canonical'].disabled = True
             self.fields['copy_from_canonical'].help_text = _(
-                "All fields need to be copied because of some required fields")
+                'All fields need to be copied because of some required fields',
+            )
 
     def get_queryset(self):
         site = self.instance.get_site()

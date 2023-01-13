@@ -13,7 +13,7 @@ from django.utils.translation import activate
 from django.utils.translation import gettext_lazy as _
 from wagtail.admin.edit_handlers import FieldPanel, MultiFieldPanel, PageChooserPanel
 from wagtail.admin.forms import WagtailAdminModelForm, WagtailAdminPageForm
-from wagtail.contrib.settings.models import BaseSetting
+from wagtail.contrib.settings.models import BaseSiteSetting
 from wagtail.contrib.settings.registry import register_setting
 from wagtail.core.models import Page, Site
 from wagtail.search.index import FilterField
@@ -30,8 +30,9 @@ class WagtailAdminLanguageForm(WagtailAdminModelForm):
 
     """
     code = forms.ChoiceField(
-        label=_("Language"), choices=settings.LANGUAGES,
-        help_text=_("One of the languages defined in LANGUAGES"))
+        label=_('Language'), choices=settings.LANGUAGES,
+        help_text=_('One of the languages defined in LANGUAGES'),
+    )
 
     class Meta:
         fields = [
@@ -51,9 +52,12 @@ class WagtailAdminLanguageForm(WagtailAdminModelForm):
         is_default = self.cleaned_data['is_default']
 
         if self.initial.get('is_default') and not is_default:
-            raise ValidationError(_(
-                "You can not remove is_default from a language. To change the "
-                "default language, select is_default on a different language"))
+            raise ValidationError(
+                _(
+                    'You can not remove is_default from a language. To change the '
+                    'default language, select is_default on a different language',
+                ),
+            )
 
         return is_default
 
@@ -80,7 +84,7 @@ def get_language_panels():
         children.insert(1, FieldPanel('is_default'))
 
     return [
-        MultiFieldPanel(heading=_("Language details"), children=children),
+        MultiFieldPanel(heading=_('Language details'), children=children),
     ]
 
 
@@ -89,12 +93,14 @@ class Language(models.Model):
     code = models.CharField(max_length=12, unique=True)
 
     is_default = models.BooleanField(
-        default=False, help_text="""Visitors with no language preference will see the site in this language""")
+        default=False, help_text="""Visitors with no language preference will see the site in this language""",
+    )
 
     position = models.IntegerField(
-        default=0, help_text="""Language choices and translations will be displayed in this order""")
+        default=0, help_text="""Language choices and translations will be displayed in this order""",
+    )
 
-    live = models.BooleanField(default=True, help_text="Is this language available for visitors to view?")
+    live = models.BooleanField(default=True, help_text='Is this language available for visitors to view?')
 
     objects = LanguageManager()
 
@@ -120,11 +126,12 @@ class AdminTranslatablePageForm(WagtailAdminPageForm):
         super().__init__(*args, **kwargs)
 
         self.fields['canonical_page'].widget = CanonicalPageWidget(
-            canonical_page=self.instance.specific.canonical_page)
+            canonical_page=self.instance.specific.canonical_page,
+        )
 
         language_display = Language.objects.filter(pk=self.initial['language']).first()
         if self.instance.specific.is_canonical and language_display:
-            language_display = "{} - {}".format(language_display, "canonical")
+            language_display = '{} - {}'.format(language_display, 'canonical')
 
         self.fields['language'].widget = ReadOnlyWidget(text_display=language_display if language_display else '')
 
@@ -144,7 +151,8 @@ class TranslatablePage(Page):
     #: Defined with a unique name, to prevent field clashes..
     translatable_page_ptr = models.OneToOneField(Page, parent_link=True, related_name='+', on_delete=models.CASCADE)
     canonical_page = models.ForeignKey(
-        'self', related_name='translations', blank=True, null=True, on_delete=models.SET_NULL)
+        'self', related_name='translations', blank=True, null=True, on_delete=models.SET_NULL,
+    )
     language = models.ForeignKey(Language, related_name='pages', on_delete=models.PROTECT, default=_language_default)
 
     is_creatable = False
@@ -155,18 +163,18 @@ class TranslatablePage(Page):
 
     settings_panels = Page.settings_panels + [
         MultiFieldPanel(
-            heading=_("Translations"),
+            heading=_('Translations'),
             children=[
                 FieldPanel('language'),
                 PageChooserPanel('canonical_page'),
-            ]
-        )
+            ],
+        ),
     ]
 
     base_form_class = AdminTranslatablePageForm
 
     def get_admin_display_title(self):
-        return "{} ({})".format(super().get_admin_display_title(), self.language)
+        return f'{super().get_admin_display_title()} ({self.language})'
 
     def serve(self, request, *args, **kwargs):
         activate(self.language.code)
@@ -209,7 +217,7 @@ class TranslatablePage(Page):
             # get target because at this point we assume the tree is in sync.
             target = TranslatablePage.objects.filter(
                 Q(language=page.language),
-                Q(canonical_page=canonical_target) | Q(pk=canonical_target.pk)
+                Q(canonical_page=canonical_target) | Q(pk=canonical_target.pk),
             ).get()
 
             page.move(target=target, pos=pos, suppress_sync=True)
@@ -267,7 +275,7 @@ class TranslatablePage(Page):
 
         """
         if self.has_translation(language):
-            raise Exception("Translation already exists")
+            raise Exception('Translation already exists')
 
         if not parent:
             parent = self.get_translation_parent(language)
@@ -275,7 +283,7 @@ class TranslatablePage(Page):
         if self.slug == self.language.code:
             slug = language.code
         else:
-            slug = '%s-%s' % (self.slug, language.code)
+            slug = f'{self.slug}-{language.code}'
 
         update_attrs = {
             'title': self.title,
@@ -383,7 +391,7 @@ class SiteLanguagesForm(WagtailAdminModelForm):
             'default_language' in self.cleaned_data and
             self.cleaned_data['default_language'] in self.cleaned_data['other_languages']
         ):
-            raise forms.ValidationError(_("Default language cannot be in other_languages"))
+            raise forms.ValidationError(_('Default language cannot be in other_languages'))
         return self.cleaned_data['other_languages']
 
     def save(self, commit=True):
@@ -404,25 +412,27 @@ def register_site_languages():
 
 
 @register_site_languages()
-class SiteLanguages(BaseSetting):
+class SiteLanguages(BaseSiteSetting):
     """Site specific settings are stored in the database"""
     default_language = models.ForeignKey(
-        Language, related_name="site_default_language", null=True, on_delete=models.PROTECT)
+        Language, related_name='site_default_language', null=True, on_delete=models.PROTECT,
+    )
     other_languages = models.ManyToManyField(Language, blank=True)
 
     panels = [
         MultiFieldPanel(
-            heading=_("Languages"),
+            heading=_('Languages'),
             children=[
                 FieldPanel('default_language'),
                 FieldPanel(
-                    'other_languages', widget=forms.CheckboxSelectMultiple),
-            ]
+                    'other_languages', widget=forms.CheckboxSelectMultiple,
+                ),
+            ],
         ),
     ]
 
     base_form_class = SiteLanguagesForm
 
     class Meta:
-        verbose_name = _("Site languages")
-        verbose_name_plural = _("Site languages")
+        verbose_name = _('Site languages')
+        verbose_name_plural = _('Site languages')

@@ -29,10 +29,12 @@ class TestSiteLanguagesAdminForm:
     def test_validate_other_langauges(self):
         edit_handler = get_setting_edit_handler(SiteLanguages)
         form_cls = edit_handler.get_form_class()
-        form = form_cls(instance=self.site.sitelanguages, data={
-            'default_language': self.default_language.pk,
-            'other_languages': [self.default_language.pk],
-        })
+        form = form_cls(
+            instance=self.site.sitelanguages, data={
+                'default_language': self.default_language.pk,
+                'other_languages': [self.default_language.pk],
+            },
+        )
 
         assert not form.is_valid()
         assert 'other_languages' in form.errors

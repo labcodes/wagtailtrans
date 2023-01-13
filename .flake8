@@ -1,0 +1,39 @@
+[flake8]
+max-line-length = 120
+extend-ignore =
+    # Pydocstyle Missing Docstrings:
+    # Missing docstring in public module
+    D100,
+    # Missing docstring in public class
+    D101,
+    # Missing docstring in public method
+    D102,
+    # Missing docstring in public function
+    D103,
+    # Missing docstring in magic method
+    D105,
+    # Pydocstyle Whitespace Issues
+    # 1 blank line required between summary line and description
+    D205,
+    # Pydocstyle Docstring Content Issues
+    # First line should end with a period
+    D400,
+    # pycodestyle Whitespace
+    # missing whitespace after ‘,’, ‘;’, or ‘:’
+    E231,
+    # too many leading ‘#’ for block comment
+    E266,
+    # pycodestyle Blank line
+    # expected 2 blank lines after end of function or class
+    E305,
+    # pycodestyle Line break warning
+    # line break before binary operator
+    W503,
+    X100,
+exclude = ./node_modules/*,*/migrations/*,./venv/*,./env/*,.tox/*
+per-file-ignores =
+    manage.py:INP001
+    docs/source/conf.py:INP001
+    manage.py:INP001,F401
+    setup.py:INP001,ENC001
+    */test_*.py: E501,W605

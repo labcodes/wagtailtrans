@@ -16,7 +16,7 @@ class ReadOnlyWidget(forms.Select):
     def render(self, *args, **kwargs):
         original_content = self.initial_widget.render(*args, **kwargs)
 
-        return mark_safe("""<span class="hidden">%s</span>%s""" % (original_content, self.text_display))
+        return mark_safe(f"""<span class="hidden">{original_content}</span>{self.text_display}""")
 
 
 class CanonicalPageWidget(forms.Select):
@@ -39,7 +39,11 @@ class CanonicalPageWidget(forms.Select):
                 {% trans "None" %}
             {% endif %}
         """)
-        return mark_safe(template.render(Context({
-            'canonical_page': self.canonical_page,
-            'original_content': original_content,
-        })))
+        return mark_safe(
+            template.render(
+                Context({
+                    'canonical_page': self.canonical_page,
+                    'original_content': original_content,
+                }),
+            ),
+        )

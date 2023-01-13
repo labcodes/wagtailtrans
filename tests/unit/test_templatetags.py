@@ -1,7 +1,7 @@
 import pytest
 from django.test import override_settings
 
-from tests.factories.pages import TranslatablePageFactory, WagtailPageFactory
+from tests.factories.pages import WagtailPageFactory
 from tests.factories.sites import SiteFactory, create_site_tree
 from wagtailtrans.templatetags import translations_wagtail_admin, wagtailtrans_tags
 
@@ -16,7 +16,7 @@ class TestWagtailtransTags:
             create_site_tree(language, site=site)
 
         translations = wagtailtrans_tags._get_translations(pages[1])
-        language_codes = [l.code for l in translations.keys()]
+        language_codes = [_l.code for _l in translations.keys()]
         assert 'en' in language_codes
         assert 'es' in language_codes
         assert 'fr' in language_codes
@@ -24,7 +24,7 @@ class TestWagtailtransTags:
         assert 'nl' in language_codes
 
         translations = wagtailtrans_tags._get_translations(pages[1], include_self=False)
-        language_codes = [l.code for l in translations.keys()]
+        language_codes = [_l.code for _l in translations.keys()]
         assert 'en' not in language_codes
         assert 'es' in language_codes
         assert 'fr' in language_codes
@@ -40,7 +40,7 @@ class TestWagtailtransTags:
         assert not hasattr(pages[0], 'language')
         translations = wagtailtrans_tags._get_translations(pages[0])
 
-        language_codes = [l.code for l in translations.keys()]
+        language_codes = [_l.code for _l in translations.keys()]
         assert language_codes[0] == 'en'
         assert language_codes[1] == 'es'
         assert language_codes[2] == 'fr'
