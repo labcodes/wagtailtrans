@@ -308,6 +308,8 @@ class TranslatablePage(Page):
 
     @cached_property
     def has_translations(self):
+        if self._state.adding:
+            return False
         return self.translations.exists()
 
     @cached_property
